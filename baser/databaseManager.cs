@@ -41,7 +41,7 @@ namespace baser
                 switch (cmd.Split(' ')[0].ToLower())
                 {
                     case "help":
-                        Console.WriteLine("addrow {rows}\ngetrow {n}\nquery {query}\nsave\nclose");
+                        Console.WriteLine("addrow {cols}\nclear\nclose\ndelrow {n}\ndump\neditrow {n} {cols}\ngetrow {n}\nquery {query}\nsave");
                         break;
                     case "close":
                     case "exit":
@@ -75,6 +75,7 @@ namespace baser
                         break;
                     case "print":
                     case "get":
+                    case "getrow":
                         Console.WriteLine();
                         print(Convert.ToInt32(cmd.Split(' ')[1]));
                         Console.WriteLine();
