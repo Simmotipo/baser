@@ -17,7 +17,7 @@ namespace baser
             {
                 try
                 {
-                    Console.Write("New {colSize} {colCount} {path}, Open {path} or exit? ");
+                    Console.Write("New {colSize} {colCount} {path}, Open {path}, Remote {http://URL:PORT}, or exit? ");
                     resp = Console.ReadLine();
                     switch (resp.ToUpper()[0])
                     {
