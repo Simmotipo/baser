@@ -5,6 +5,7 @@ namespace baser
     class Controller
     {
         public static databaseManager dbMgr;
+        public static string version = "1.2.1";
         public static void Main(string[] args)
         {
             string resp = "";
@@ -28,6 +29,9 @@ namespace baser
                             break;
                         case 'E':
                             Environment.Exit(0);
+                            break;
+                        case 'V':
+                            Console.WriteLine(version);
                             break;
                     }
                 }

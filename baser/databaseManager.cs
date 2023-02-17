@@ -53,7 +53,7 @@ namespace baser
             switch (cmd.Split(' ')[0].ToLower())
             {
                 case "help":
-                    return "addrow {cols}\nclear\nclose\ndelrow {n}\ndisableapi\ndump\neditrow {n} {cols}\nenableapi {port} (requires Admin/Sudo)\ngetrow {n}\nquery {query}\nsave";
+                    return "addrow {cols}\nclear\nclose\ndelrow {n}\ndisableapi\ndump\neditrow {n} {cols}\nenableapi {port} (requires Admin/Sudo)\ngetrow {n}\nquery {query}\nsave\nversion";
                 case "enableapi":
                     if (api != null) return "The API is already started";
                     else
@@ -111,6 +111,10 @@ namespace baser
                     int totalRows = db.Length / bytesPerRow;
                     for (int i = 0; i < totalRows; i++) output += print(i);
                     return output;
+                case "version":
+                case "ver":
+                case "info":
+                    return Controller.version;
                 default:
                     try
                     {
