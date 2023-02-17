@@ -27,9 +27,9 @@ namespace baser
         {
             if (!path.EndsWith(".dbr")) path += ".dbr";
             dbPath = path;
-            byte[] dataIngress;
-            if (mode == "localFile") File.ReadAllBytes(path);
-            else if (mode == "remoteFile") { Console.WriteLine("Not yet implemented. Exitting"); }
+            byte[] dataIngress = null;
+            if (mode == "localFile") dataIngress = File.ReadAllBytes(path);
+            else if (mode == "remoteFile") { Console.WriteLine("Not yet implemented. Exitting"); return; }
             db = new byte[dataIngress.Length - 4];
             for (int i = 0; i < db.Length; i++) db[i] = dataIngress[i + 4];
             byte[] colBytes = { dataIngress[0], dataIngress[1] };
@@ -43,19 +43,20 @@ namespace baser
             {
                 Console.Write("> ");
                 string cmd = Console.ReadLine();
-                Console.WriteLine(Do(cmd));
+                Console.WriteLine(Do(cmd, mode));
                 
             }
 
         }
 
-        public string Do(string cmd, string source = "local")
+        public string Do(string cmd, string mode, string source = "local")
         {
             switch (cmd.Split(' ')[0].ToLower())
             {
                 case "help":
                     return "addrow {cols}\nclear\nclose\ndelrow {n}\ndisableapi\ndump\neditrow {n} {cols}\nenableapi {port} (requires Admin/Sudo)\ngetrow {n}\nquery {query}\nsave\nversion";
                 case "enableapi":
+                case "openapi":
                     if (api != null) return "The API is already started";
                     else
                     {
@@ -115,7 +116,18 @@ namespace baser
                 case "version":
                 case "ver":
                 case "info":
-                    return Controller.version;
+                    if (mode == "localVersion") return Controller.version;
+                    else
+                    {
+                        using (var httpClient = new HttpClient())
+                        {
+                            using (var request = new HttpRequestMessage(new HttpMethod("GET"), $"{dbPath}/version"))
+                            {
+                                var response = httpClient.SendAsync(request);
+                                return $"Local {Controller.version} | Remote {response.ToString()}";
+                            }
+                        }
+                    }
                 default:
                     try
                     {

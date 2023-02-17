@@ -49,7 +49,7 @@ namespace baser
                 request = HttpUtility.UrlDecode(request);
                 if (request.ToLower() != "favicon.ico")
                 {
-                    string result = dbMgr.Do(request);
+                    string result = dbMgr.Do(request, "localFile");
 
                     // Write the response info
                     byte[] data = Encoding.UTF8.GetBytes(result);

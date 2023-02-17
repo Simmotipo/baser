@@ -25,13 +25,13 @@ namespace baser
                             createDB(resp.Split(' ')[3], Convert.ToUInt16(resp.Split(' ')[1]), Convert.ToUInt16(resp.Split(' ')[2]));
                             break;
                         case 'O':
-                            databaseManager dbMgr = new databaseManager(resp.Split(' ')[1]);
+                            dbMgr = new databaseManager(resp.Split(' ')[1]);
                             break;
                         case 'E':
                             Environment.Exit(0);
                             break;
                         case 'R':
-                            Console.WriteLine("Not implemented yet.");
+                            dbMgr = new databaseManager(resp.Split(' ')[1], "remoteFile");
                             break;
                         case 'V':
                             Console.WriteLine(version);
