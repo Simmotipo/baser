@@ -49,6 +49,7 @@ namespace baser
                 request = HttpUtility.UrlDecode(request);
                 if (request.ToLower() != "favicon.ico")
                 {
+                    Console.WriteLine($"[WEB] {request}");
                     string result = dbMgr.Do(request, "localFile");
 
                     // Write the response info

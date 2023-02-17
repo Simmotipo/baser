@@ -16,7 +16,7 @@ namespace baser
         ushort colCount;
         ushort colSize;
         byte[] cols;
-        byte[] db;
+        public byte[] db;
         int bytesPerRow;
         bool changed = false;
         bool localRunning = true;
@@ -25,31 +25,50 @@ namespace baser
 
         public databaseManager(string path, string mode = "localFile")
         {
-            if (!path.EndsWith(".dbr")) path += ".dbr";
             dbPath = path;
             byte[] dataIngress = null;
-            if (mode == "localFile") dataIngress = File.ReadAllBytes(path);
-            else if (mode == "remoteFile") { Console.WriteLine("Not yet implemented. Exitting"); return; }
-            db = new byte[dataIngress.Length - 4];
-            for (int i = 0; i < db.Length; i++) db[i] = dataIngress[i + 4];
-            byte[] colBytes = { dataIngress[0], dataIngress[1] };
-            colSize = BitConverter.ToUInt16(colBytes);
-            colBytes =new byte[] { dataIngress[2], dataIngress[3] };
-            colCount = BitConverter.ToUInt16(colBytes);
+            if (mode == "localFile") 
+            {
+                if (!path.EndsWith(".dbr")) path += ".dbr";
 
-            Console.WriteLine($"Opened {path} with {colCount} cols of {colSize} bytes each.");
-            bytesPerRow = colCount * colSize;
+                dataIngress = File.ReadAllBytes(path);
+                db = new byte[dataIngress.Length - 4];
+                for (int i = 0; i < db.Length; i++) db[i] = dataIngress[i + 4];
+                byte[] colBytes = { dataIngress[0], dataIngress[1] };
+                colSize = BitConverter.ToUInt16(colBytes);
+                colBytes = new byte[] { dataIngress[2], dataIngress[3] };
+                colCount = BitConverter.ToUInt16(colBytes);
+
+                Console.WriteLine($"Opened {path} with {colCount} cols of {colSize} bytes each.");
+                bytesPerRow = colCount * colSize;
+            }
+            else
+            {
+                if (!dbPath.StartsWith("http://")) dbPath = "http://" + dbPath;
+                if (dbPath.EndsWith("/")) dbPath = dbPath.Substring(0, dbPath.Length - 1);
+            }
             while (localRunning)
             {
                 Console.Write("> ");
                 string cmd = Console.ReadLine();
-                Console.WriteLine(Do(cmd, mode));
+                if (mode == "localFile" || cmd.ToLower() == "version" || cmd.ToLower() == "ver" || cmd.ToLower() == "info") Console.WriteLine(Do(cmd, mode));
+                else
+                {
+                    using (var httpClient = new HttpClient())
+                    {
+                        using (var request = new HttpRequestMessage(new HttpMethod("GET"), $"{dbPath}/{cmd}"))
+                        {
+                            var response = httpClient.SendAsync(request);
+                            Console.WriteLine(response.Result.Content.ReadAsStringAsync().Result);
+                        }
+                    }
+                }
                 
             }
 
         }
 
-        public string Do(string cmd, string mode, string source = "local")
+        public string Do(string cmd, string mode, string source = "localFile")
         {
             switch (cmd.Split(' ')[0].ToLower())
             {
@@ -116,7 +135,7 @@ namespace baser
                 case "version":
                 case "ver":
                 case "info":
-                    if (mode == "localVersion") return Controller.version;
+                    if (mode == "localFile") return Controller.version;
                     else
                     {
                         using (var httpClient = new HttpClient())
@@ -124,7 +143,7 @@ namespace baser
                             using (var request = new HttpRequestMessage(new HttpMethod("GET"), $"{dbPath}/version"))
                             {
                                 var response = httpClient.SendAsync(request);
-                                return $"Local {Controller.version} | Remote {response.ToString()}";
+                                return $"Local {Controller.version} | Remote {response.Result.Content.ReadAsStringAsync().Result}";
                             }
                         }
                     }
@@ -135,6 +154,11 @@ namespace baser
                     }
                     catch (Exception e) { return "Unknown Command"; }
             }
+        }
+
+        public byte[] pullFileContents()
+        {
+            return File.ReadAllBytes(dbPath);
         }
 
         public string query(string equation)
