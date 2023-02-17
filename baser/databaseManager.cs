@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -20,6 +21,7 @@ namespace baser
         bool changed = false;
         bool localRunning = true;
         bool apiRunning = false;
+        apiManager api = null;
 
         public databaseManager(string path)
         {
@@ -52,6 +54,29 @@ namespace baser
             {
                 case "help":
                     return "addrow {cols}\nclear\nclose\ndelrow {n}\ndisableapi\ndump\neditrow {n} {cols}\nenableapi {port} (requires Admin/Sudo)\ngetrow {n}\nquery {query}\nsave";
+                case "enableapi":
+                    if (api != null) return "The API is already started";
+                    else
+                    {
+                        try
+                        {
+                            api = new apiManager(Convert.ToUInt16(cmd.Split(' ')[1]), this);
+                            return "Started";
+                        }
+                        catch (Exception e)
+                        {
+                            return "Error occured. Are you definitely running in Admin/Sudo?";
+                        }
+                    }
+                case "disableapi":
+                    if (api == null) return "API is not currently running";
+                    else
+                    {
+                        api.runServer = false;
+                        while (!api.deleteable) Thread.Sleep(10);
+                        api = null;
+                        return "API Stopped";
+                    }
                 case "close":
                 case "exit":
                     if (!changed || cmd.Split(' ').Length > 1 && cmd.Split(' ')[1].ToLower() == "--nosave" && source == "local") localRunning = false;
@@ -285,7 +310,7 @@ namespace baser
         public bool sortByColumn(ushort colNumber)
         {
             return false;
-        }
+        } //Not yet implemented
 
         public bool save()
         {
