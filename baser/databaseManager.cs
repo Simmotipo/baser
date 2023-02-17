@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace baser
 {
@@ -17,6 +18,8 @@ namespace baser
         byte[] db;
         int bytesPerRow;
         bool changed = false;
+        bool localRunning = true;
+        bool apiRunning = false;
 
         public databaseManager(string path)
         {
@@ -33,70 +36,66 @@ namespace baser
 
             Console.WriteLine($"Opened {path} with {colCount} cols of {colSize} bytes each.");
             bytesPerRow = colCount * colSize;
-            bool running = true;
-            while (running)
+            while (localRunning)
             {
                 Console.Write("> ");
                 string cmd = Console.ReadLine();
-                switch (cmd.Split(' ')[0].ToLower())
-                {
-                    case "help":
-                        Console.WriteLine("addrow {cols}\nclear\nclose\ndelrow {n}\ndump\neditrow {n} {cols}\ngetrow {n}\nquery {query}\nsave");
-                        break;
-                    case "close":
-                    case "exit":
-                        if (!changed || cmd.Split(' ').Length > 1 && cmd.Split(' ')[1].ToLower() == "--nosave") running = false;
-                        else Console.WriteLine("There are unsaved changes! Use exit --nosave to close without saving!");
-                        break;
-                    case "addrow":
-                        bool status = addRow(cmd.Substring(7).Split(' '));
-                        if (status) Console.WriteLine("Success");
-                        else Console.WriteLine("Invalid");
-                        break;
-                    case "query":
-                        query(cmd.Substring(6));
-                        break;
-                    case "save":
-                        if (save()) Console.WriteLine("Success");
-                        else Console.WriteLine("Failed");
-                        break;
-                    case "delrow":
-                        if (delRow(Convert.ToInt32(cmd.Substring(7)))) Console.WriteLine("Success");
-                        else Console.WriteLine("Error");
-                        break;
-                    case "editrow":
-                        if (editRow(Convert.ToInt32(cmd.Split(' ')[1]), cmd.Split(' ').Skip(2).ToArray())) Console.WriteLine("Success");
-                        else Console.WriteLine("Error");
-                        break;
-                    case "clear":
-                    case "clr":
-                    case "cls":
-                        Console.Clear();
-                        break;
-                    case "print":
-                    case "get":
-                    case "getrow":
-                        Console.WriteLine();
-                        print(Convert.ToInt32(cmd.Split(' ')[1]));
-                        Console.WriteLine();
-                        break;
-                    case "dump":
-                        int totalRows = db.Length / bytesPerRow;
-                        for (int i = 0; i < totalRows; i++) print(i);
-                        break;
-                    default:
-                        try
-                        {
-                            query(cmd);
-                        }
-                        catch (Exception e) { Console.WriteLine("Unknown Command"); }
-                        break;
-                }
+                Console.WriteLine(Do(cmd));
+                
             }
 
         }
 
-        public int[] query(string equation)
+        public string Do(string cmd, string source = "local")
+        {
+            switch (cmd.Split(' ')[0].ToLower())
+            {
+                case "help":
+                    return "addrow {cols}\nclear\nclose\ndelrow {n}\ndisableapi\ndump\neditrow {n} {cols}\nenableapi {port} (requires Admin/Sudo)\ngetrow {n}\nquery {query}\nsave";
+                case "close":
+                case "exit":
+                    if (!changed || cmd.Split(' ').Length > 1 && cmd.Split(' ')[1].ToLower() == "--nosave" && source == "local") localRunning = false;
+                    else return "There are unsaved changes! Use exit --nosave to close without saving!";
+                    return "";
+                case "addrow":
+                    bool status = addRow(cmd.Substring(7).Split(' '));
+                    if (status) return "Success";
+                    else return "Invalid";
+                case "query":
+                    return query(cmd.Substring(6));
+                case "save":
+                    if (save()) return "Success";
+                    else return "Failed";
+                case "delrow":
+                    if (delRow(Convert.ToInt32(cmd.Substring(7)))) return "Success";
+                    else return "Error";
+                case "editrow":
+                    if (editRow(Convert.ToInt32(cmd.Split(' ')[1]), cmd.Split(' ').Skip(2).ToArray())) return "Success";
+                    else return "Error";
+                case "clear":
+                case "clr":
+                case "cls":
+                    Console.Clear();
+                    return "";
+                case "print":
+                case "get":
+                case "getrow":
+                    return "\n" + print(Convert.ToInt32(cmd.Split(' ')[1])) + "\n";
+                case "dump":
+                    string output = "";
+                    int totalRows = db.Length / bytesPerRow;
+                    for (int i = 0; i < totalRows; i++) output += print(i);
+                    return output;
+                default:
+                    try
+                    {
+                        return query(cmd);
+                    }
+                    catch (Exception e) { return "Unknown Command"; }
+            }
+        }
+
+        public string query(string equation)
         {
             try
             {
@@ -110,18 +109,18 @@ namespace baser
                 {
                     foreach (int i in queryTask(query)) if (!validRows.Contains(i)) validRows.Add(i);
                 }
-
-                foreach (int i in validRows) print(i);
+                string output = "";
+                foreach (int i in validRows) output += print(i);
+                return output;
             }
-            catch (Exception e) { Console.WriteLine("Invalid request"); }
-            return null;
+            catch (Exception e) { return "Invalid request"; }
         }
 
-        public void print(int row)
+        public string print(int row)
         {
             string output = "";
             foreach (string col in getRow(row)) output += $" | {col}";
-            Console.WriteLine($"{row.ToString().PadLeft(4, ' ')} | {output.Substring(3).Replace($"{(char)Convert.ToByte(0)}", " ")}");
+            return $"{row.ToString().PadLeft(4, ' ')} | {output.Substring(3).Replace($"{(char)Convert.ToByte(0)}", " ")}\n";
         }
 
         public int[] queryTask(string query)
