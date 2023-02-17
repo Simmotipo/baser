@@ -23,12 +23,13 @@ namespace baser
         bool apiRunning = false;
         apiManager api = null;
 
-        public databaseManager(string path)
+        public databaseManager(string path, string mode = "localFile")
         {
             if (!path.EndsWith(".dbr")) path += ".dbr";
             dbPath = path;
-            byte[] dataIngress = File.ReadAllBytes(path);
-
+            byte[] dataIngress;
+            if (mode == "localFile") File.ReadAllBytes(path);
+            else if (mode == "remoteFile") { Console.WriteLine("Not yet implemented. Exitting"); }
             db = new byte[dataIngress.Length - 4];
             for (int i = 0; i < db.Length; i++) db[i] = dataIngress[i + 4];
             byte[] colBytes = { dataIngress[0], dataIngress[1] };

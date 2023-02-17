@@ -30,6 +30,9 @@ namespace baser
                         case 'E':
                             Environment.Exit(0);
                             break;
+                        case 'R':
+                            Console.WriteLine("Not implemented yet.");
+                            break;
                         case 'V':
                             Console.WriteLine(version);
                             break;
