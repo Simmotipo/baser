@@ -4,12 +4,14 @@ namespace baser
 {
     class Controller
     {
+        public static databaseManager dbMgr;
+        public static string version = "1.2.1";
         public static void Main(string[] args)
         {
             string resp = "";
             if (args.Length == 1 && File.Exists(args[0]))
             {
-                databaseManager dbMgr = new databaseManager(args[0]);
+                dbMgr = new databaseManager(args[0]);
             }
             while (true)
             {
@@ -27,6 +29,9 @@ namespace baser
                             break;
                         case 'E':
                             Environment.Exit(0);
+                            break;
+                        case 'V':
+                            Console.WriteLine(version);
                             break;
                     }
                 }
