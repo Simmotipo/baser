@@ -17,6 +17,7 @@ namespace baser
         ushort colSize;
         byte[] cols;
         public byte[] db;
+        public string[] localCmds = { "version", "ver", "info", "clear", "clr", "cls", "exit", "close"};
         int bytesPerRow;
         bool changed = false;
         bool localRunning = true;
@@ -56,15 +57,19 @@ namespace baser
                 {
                     Console.Write("> ");
                     string cmd = Console.ReadLine();
-                    if (mode == "localFile" || cmd.ToLower() == "version" || cmd.ToLower() == "ver" || cmd.ToLower() == "info") Console.WriteLine(Do(cmd, mode));
+                    if (mode == "localFile" || localCmds.Contains(cmd.Split(' ')[0])) Console.WriteLine(Do(cmd, mode));
                     else
                     {
-                        using (var httpClient = new HttpClient())
+                        if (cmd.Split(' ')[0].ToLower() == "disableapi") Console.WriteLine("ERR: You cannot run disableapi from remote client!");
+                        else
                         {
-                            using (var request = new HttpRequestMessage(new HttpMethod("GET"), $"{dbPath}/{cmd}"))
+                            using (var httpClient = new HttpClient())
                             {
-                                var response = httpClient.SendAsync(request);
-                                Console.WriteLine(response.Result.Content.ReadAsStringAsync().Result);
+                                using (var request = new HttpRequestMessage(new HttpMethod("GET"), $"{dbPath}/{cmd}"))
+                                {
+                                    var response = httpClient.SendAsync(request);
+                                    Console.WriteLine(response.Result.Content.ReadAsStringAsync().Result);
+                                }
                             }
                         }
                     }

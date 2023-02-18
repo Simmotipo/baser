@@ -5,7 +5,7 @@ namespace baser
     class Controller
     {
         public static databaseManager dbMgr;
-        public static string version = "1.3.2";
+        public static string version = "1.3.4";
         public static void Main(string[] args)
         {
             string resp = "";
