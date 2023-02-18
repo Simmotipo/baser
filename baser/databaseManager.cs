@@ -23,7 +23,7 @@ namespace baser
         bool apiRunning = false;
         apiManager api = null;
 
-        public databaseManager(string path, string mode = "localFile")
+        public databaseManager(string path, string mode = "localFile", ushort apiPort = 0)
         {
             dbPath = path;
             byte[] dataIngress = null;
@@ -47,23 +47,29 @@ namespace baser
                 if (!dbPath.StartsWith("http://")) dbPath = "http://" + dbPath;
                 if (dbPath.EndsWith("/")) dbPath = dbPath.Substring(0, dbPath.Length - 1);
             }
+
+            if (apiPort != 0) Do($"enableapi {apiPort}", "localFile");
+
             while (localRunning)
             {
-                Console.Write("> ");
-                string cmd = Console.ReadLine();
-                if (mode == "localFile" || cmd.ToLower() == "version" || cmd.ToLower() == "ver" || cmd.ToLower() == "info") Console.WriteLine(Do(cmd, mode));
-                else
+                try
                 {
-                    using (var httpClient = new HttpClient())
+                    Console.Write("> ");
+                    string cmd = Console.ReadLine();
+                    if (mode == "localFile" || cmd.ToLower() == "version" || cmd.ToLower() == "ver" || cmd.ToLower() == "info") Console.WriteLine(Do(cmd, mode));
+                    else
                     {
-                        using (var request = new HttpRequestMessage(new HttpMethod("GET"), $"{dbPath}/{cmd}"))
+                        using (var httpClient = new HttpClient())
                         {
-                            var response = httpClient.SendAsync(request);
-                            Console.WriteLine(response.Result.Content.ReadAsStringAsync().Result);
+                            using (var request = new HttpRequestMessage(new HttpMethod("GET"), $"{dbPath}/{cmd}"))
+                            {
+                                var response = httpClient.SendAsync(request);
+                                Console.WriteLine(response.Result.Content.ReadAsStringAsync().Result);
+                            }
                         }
                     }
                 }
-                
+                catch (Exception e) { }
             }
 
         }
