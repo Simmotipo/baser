@@ -172,7 +172,7 @@ namespace baser
             return File.ReadAllBytes(dbPath);
         }
 
-        public string query(string equation)
+        public string query(string equation) // Note: This does not currently fuction as intended. & is treated as OR presently. Pls fix.
         {
             try
             {
