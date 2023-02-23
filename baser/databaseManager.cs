@@ -285,27 +285,45 @@ namespace baser
                 {
                     for (int i = 0; i < rowIndex.Length; i++)
                     {
+                        bool breakMe = false;
                         for (colNumber = 0; colNumber < colCount; colNumber++)
                         {
                             string reference = getRow(rowIndex[i])[colNumber].ToLower().Replace($"{(char)Convert.ToByte(0)}", "");
                             switch (colTerm)
                             {
                                 case "is":
-                                    if ((reference == term).Equals(boolean) && !validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
+                                    if ((reference == term).Equals(boolean))
+                                    {
+                                        if (!validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
+                                    }
+                                    else if (!boolean) breakMe = true;
                                     break;
                                 case "contains":
                                 case "has":
-                                    if (reference.Contains(term).Equals(boolean) && !validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
+                                    if (reference.Contains(term).Equals(boolean))
+                                    {
+                                        if (!validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
+                                    }
+                                    else if (!boolean) breakMe = true;
                                     break;
                                 case "begins":
                                 case "starts":
-                                    if (reference.StartsWith(term).Equals(boolean) && !validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
+                                    if (reference.StartsWith(term).Equals(boolean))
+                                    {
+                                        if (!validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
+                                    }
+                                    else if (!boolean) breakMe = true;
                                     break;
                                 case "ends":
-                                    if (reference.EndsWith(term).Equals(boolean) && !validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
+                                    if (reference.EndsWith(term).Equals(boolean))
+                                    {
+                                        if (!validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
+                                    }
+                                    else if (!boolean) breakMe = true;
                                     break;
 
                             }
+                            if (breakMe) break;
                         }
                     }
                 }
