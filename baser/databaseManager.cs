@@ -173,27 +173,6 @@ namespace baser
             return File.ReadAllBytes(dbPath);
         }
 
-        public string query(string equation) // Note: This does not currently fuction as intended. & is treated as OR presently. Pls fix.
-        {
-            try
-            {
-                //Options: .is .contains .starts and .ends
-                //Example syntax: firstname.contains=John&mobile.starts=079&surname.contains~Doe
-                //Searched for people with first name John, but not last name Doe, with mobile # starting 079
-
-                string[] queries = equation.Split('&'); //Note: this is currently all implementing OR only.
-                List<int> validRows = new List<int>(); //migrate away from List<>s
-                foreach (string query in queries)
-                {
-                    foreach (int i in queryTask(query)) if (!validRows.Contains(i)) validRows.Add(i);
-                }
-                string output = "";
-                foreach (int i in validRows) output += print(i);
-                return output;
-            }
-            catch (Exception e) { return "Invalid request"; }
-        }
-
         public string print(int row)
         {
             string output = "";
@@ -201,7 +180,54 @@ namespace baser
             return $"{row.ToString().PadLeft(4, ' ')} | {output.Substring(3).Replace($"{(char)Convert.ToByte(0)}", " ")}\n";
         }
 
-        public int[] queryTask(string query)
+        public string query(string equation)
+        {
+            try
+            {
+                //NOTE: Operation order is important. E.G.:
+                // A, B, C, D
+                // 1, 2, 3, 4
+                // X, Y, Z, 4
+                // M, N, O, P
+
+                //d.is=4&a.is=1%a.is=M
+                //Will return "1, 2, 3, 4" and "M, N, O, P"
+                //This is because splits occur at %. Hence
+                //d.is=4&a.is=1%a.is=M is seen as
+                //(d.is=4 AND a.is=1) OR a.is=M
+
+                List<int> validRows = new List<int>();
+
+                string[] queries = equation.Split('%'); //Note: this is currently all implementing OR only.
+                foreach (string query in queries)
+                {
+                    foreach (int i in runQuery(query.Split('&'))) if (!validRows.Contains(i)) validRows.Add(i);
+                }
+
+
+                string output = "";
+                validRows.Sort();
+                foreach (int i in validRows) output += print(i);
+                return output;
+            }
+            catch (Exception e) { return "Invalid request"; }
+        }
+
+        public int[] runQuery(string[] queries)
+        {
+            int[] validRows = null;
+            for (int e = 0; e < queries.Length; e++)
+            {
+                if (e == 0) validRows = queryTask(queries[e]);
+                else
+                {
+                    validRows = queryTask(queries[e], validRows);
+                }
+            }
+            return validRows.ToArray();
+        }
+
+        public int[] queryTask(string query, int[] rowIndex = null)
         {
             try
             {
@@ -212,33 +238,41 @@ namespace baser
                 if (query.Contains("=")) term = query.Split('=')[1];
                 else term = query.Split('~')[1];
                 term = term.ToLower();
-                
+
+                //Get col No
                 ushort colNumber = 0;
+                string[] headings = getRow(0);
+                for (ushort i = 0; i < headings.Length; i++) if (headings[i].ToLower().Replace($"{(char)Convert.ToByte(0)}", "") == colName.ToLower()) colNumber = i;
+
+                int totalRows = db.Length / bytesPerRow;
+
+                if (rowIndex == null)
+                {
+                    List<int> t = new List<int>();
+                    for (int x = 0; x < totalRows; x++) t.Add(x);
+                    rowIndex = t.ToArray();
+                }
+
                 if (colName.Length > 1)
                 {
-                    //Get col No
-                    string[] headings = getRow(0);
-                    for (ushort i = 0; i < headings.Length; i++) if (headings[i].ToLower().Replace($"{(char)Convert.ToByte(0)}", "") == colName.ToLower()) colNumber = i;
-
-                    int totalRows = db.Length / bytesPerRow;
-                    for (int i = 0; i < totalRows; i++)
+                    for (int i = 0; i < rowIndex.Length; i++)
                     {
-                        string reference = getRow(i)[colNumber].ToLower().Replace($"{(char)Convert.ToByte(0)}", "");
+                        string reference = getRow(rowIndex[i])[colNumber].ToLower().Replace($"{(char)Convert.ToByte(0)}", "");
                         switch (colTerm)
                         {
                             case "is":
-                                if (reference == term) validRows.Add(i);
+                                if (reference == term) validRows.Add(rowIndex[i]);
                                 break;
                             case "contains":
                             case "has":
-                                if (reference.Contains(term)) validRows.Add(i);
+                                if (reference.Contains(term)) validRows.Add(rowIndex[i]);
                                 break;
                             case "begins":
                             case "starts":
-                                if (reference.StartsWith(term)) validRows.Add(i);
+                                if (reference.StartsWith(term)) validRows.Add(rowIndex[i]);
                                 break;
                             case "ends":
-                                if (reference.EndsWith(term)) validRows.Add(i);
+                                if (reference.EndsWith(term)) validRows.Add(rowIndex[i]);
                                 break;
 
                         }
@@ -246,28 +280,26 @@ namespace baser
                 }
                 else
                 {
-
-                    int totalRows = db.Length / bytesPerRow;
-                    for (int i = 0; i < totalRows; i++)
+                    for (int i = 0; i < rowIndex.Length; i++)
                     {
                         for (colNumber = 0; colNumber < colCount; colNumber++)
                         {
-                            string reference = getRow(i)[colNumber].ToLower().Replace($"{(char)Convert.ToByte(0)}", "");
+                            string reference = getRow(rowIndex[i])[colNumber].ToLower().Replace($"{(char)Convert.ToByte(0)}", "");
                             switch (colTerm)
                             {
                                 case "is":
-                                    if (reference == term && !validRows.Contains(i)) validRows.Add(i);
+                                    if (reference == term && !validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
                                     break;
                                 case "contains":
                                 case "has":
-                                    if (reference.Contains(term) && !validRows.Contains(i)) validRows.Add(i);
+                                    if (reference.Contains(term) && !validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
                                     break;
                                 case "begins":
                                 case "starts":
-                                    if (reference.StartsWith(term) && !validRows.Contains(i)) validRows.Add(i);
+                                    if (reference.StartsWith(term) && !validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
                                     break;
                                 case "ends":
-                                    if (reference.EndsWith(term) && !validRows.Contains(i)) validRows.Add(i);
+                                    if (reference.EndsWith(term) && !validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
                                     break;
 
                             }
