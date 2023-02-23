@@ -16,45 +16,77 @@ namespace baser
         ushort colCount;
         ushort colSize;
         byte[] cols;
-        byte[] db;
+        public byte[] db;
+        public string[] localCmds = { "version", "ver", "info", "clear", "clr", "cls", "exit", "close"};
         int bytesPerRow;
         bool changed = false;
         bool localRunning = true;
         bool apiRunning = false;
         apiManager api = null;
 
-        public databaseManager(string path)
+        public databaseManager(string path, string mode = "localFile", ushort apiPort = 0)
         {
-            if (!path.EndsWith(".dbr")) path += ".dbr";
             dbPath = path;
-            byte[] dataIngress = File.ReadAllBytes(path);
+            byte[] dataIngress = null;
+            if (mode == "localFile") 
+            {
+                if (!path.EndsWith(".dbr")) path += ".dbr";
 
-            db = new byte[dataIngress.Length - 4];
-            for (int i = 0; i < db.Length; i++) db[i] = dataIngress[i + 4];
-            byte[] colBytes = { dataIngress[0], dataIngress[1] };
-            colSize = BitConverter.ToUInt16(colBytes);
-            colBytes =new byte[] { dataIngress[2], dataIngress[3] };
-            colCount = BitConverter.ToUInt16(colBytes);
+                dataIngress = File.ReadAllBytes(path);
+                db = new byte[dataIngress.Length - 4];
+                for (int i = 0; i < db.Length; i++) db[i] = dataIngress[i + 4];
+                byte[] colBytes = { dataIngress[0], dataIngress[1] };
+                colSize = BitConverter.ToUInt16(colBytes);
+                colBytes = new byte[] { dataIngress[2], dataIngress[3] };
+                colCount = BitConverter.ToUInt16(colBytes);
 
-            Console.WriteLine($"Opened {path} with {colCount} cols of {colSize} bytes each.");
-            bytesPerRow = colCount * colSize;
+                Console.WriteLine($"Opened {path} with {colCount} cols of {colSize} bytes each.");
+                bytesPerRow = colCount * colSize;
+            }
+            else
+            {
+                if (!dbPath.StartsWith("http://")) dbPath = "http://" + dbPath;
+                if (dbPath.EndsWith("/")) dbPath = dbPath.Substring(0, dbPath.Length - 1);
+            }
+
+            if (apiPort != 0) Do($"enableapi {apiPort}", "localFile");
+
             while (localRunning)
             {
-                Console.Write("> ");
-                string cmd = Console.ReadLine();
-                Console.WriteLine(Do(cmd));
-                
+                try
+                {
+                    Console.Write("> ");
+                    string cmd = Console.ReadLine();
+                    if (mode == "localFile" || localCmds.Contains(cmd.Split(' ')[0])) Console.WriteLine(Do(cmd, mode));
+                    else
+                    {
+                        if (cmd.Split(' ')[0].ToLower() == "disableapi") Console.WriteLine("ERR: You cannot run disableapi from remote client!");
+                        else
+                        {
+                            using (var httpClient = new HttpClient())
+                            {
+                                using (var request = new HttpRequestMessage(new HttpMethod("GET"), $"{dbPath}/{cmd}"))
+                                {
+                                    var response = httpClient.SendAsync(request);
+                                    Console.WriteLine(response.Result.Content.ReadAsStringAsync().Result);
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception e) { }
             }
 
         }
 
-        public string Do(string cmd, string source = "local")
+        public string Do(string cmd, string mode, string source = "localFile")
         {
             switch (cmd.Split(' ')[0].ToLower())
             {
                 case "help":
                     return "addrow {cols}\nclear\nclose\ndelrow {n}\ndisableapi\ndump\neditrow {n} {cols}\nenableapi {port} (requires Admin/Sudo)\ngetrow {n}\nquery {query}\nsave\nversion";
                 case "enableapi":
+                case "openapi":
                     if (api != null) return "The API is already started";
                     else
                     {
@@ -114,7 +146,18 @@ namespace baser
                 case "version":
                 case "ver":
                 case "info":
-                    return Controller.version;
+                    if (mode == "localFile") return Controller.version;
+                    else
+                    {
+                        using (var httpClient = new HttpClient())
+                        {
+                            using (var request = new HttpRequestMessage(new HttpMethod("GET"), $"{dbPath}/version"))
+                            {
+                                var response = httpClient.SendAsync(request);
+                                return $"Local {Controller.version} | Remote {response.Result.Content.ReadAsStringAsync().Result}";
+                            }
+                        }
+                    }
                 default:
                     try
                     {
@@ -124,7 +167,12 @@ namespace baser
             }
         }
 
-        public string query(string equation)
+        public byte[] pullFileContents()
+        {
+            return File.ReadAllBytes(dbPath);
+        }
+
+        public string query(string equation) // Note: This does not currently fuction as intended. & is treated as OR presently. Pls fix.
         {
             try
             {

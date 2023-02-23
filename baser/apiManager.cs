@@ -16,6 +16,8 @@ namespace baser
         public bool runServer = true;
         public bool deleteable = false;
         databaseManager dbMgr;
+        public string[] noServCmds = { "disableapi", "clear", "clr", "cls", "exit", "close" };
+
 
         public apiManager(ushort port, databaseManager db, string addr = "+")
         {
@@ -49,7 +51,10 @@ namespace baser
                 request = HttpUtility.UrlDecode(request);
                 if (request.ToLower() != "favicon.ico")
                 {
-                    string result = dbMgr.Do(request);
+                    Console.WriteLine($"[WEB] {request}");
+                    string result = "";
+                    if (noServCmds.Contains(request.Split(' ')[0].ToLower())) result = "ERR: You have requested over API a command that can only be run locally (or on a local database).\nWhile you are here, we recommend ensuring you are running at least version 1.3.4, as this resolves some of these issues.";
+                    else result = dbMgr.Do(request, "localFile");
 
                     // Write the response info
                     byte[] data = Encoding.UTF8.GetBytes(result);
