@@ -233,7 +233,10 @@ namespace baser
             {
                 List<int> validRows = new List<int>(); //migrate away from List<>s
                 string colName = query.Split('.')[0];
+                bool boolean = true;
                 string colTerm = query.Split('.')[1].Split('=')[0].ToLower();
+
+                if (query.Contains('~')) { colTerm = query.Split('.')[1].Split('~')[0].ToLower(); boolean = false; }
                 string term = "";
                 if (query.Contains("=")) term = query.Split('=')[1];
                 else term = query.Split('~')[1];
@@ -261,18 +264,18 @@ namespace baser
                         switch (colTerm)
                         {
                             case "is":
-                                if (reference == term) validRows.Add(rowIndex[i]);
+                                if ((reference == term).Equals(boolean)) validRows.Add(rowIndex[i]);
                                 break;
                             case "contains":
                             case "has":
-                                if (reference.Contains(term)) validRows.Add(rowIndex[i]);
+                                if (reference.Contains(term).Equals(boolean)) validRows.Add(rowIndex[i]);
                                 break;
                             case "begins":
                             case "starts":
-                                if (reference.StartsWith(term)) validRows.Add(rowIndex[i]);
+                                if (reference.StartsWith(term).Equals(boolean)) validRows.Add(rowIndex[i]);
                                 break;
                             case "ends":
-                                if (reference.EndsWith(term)) validRows.Add(rowIndex[i]);
+                                if (reference.EndsWith(term).Equals(boolean)) validRows.Add(rowIndex[i]);
                                 break;
 
                         }
@@ -288,18 +291,18 @@ namespace baser
                             switch (colTerm)
                             {
                                 case "is":
-                                    if (reference == term && !validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
+                                    if ((reference == term).Equals(boolean) && !validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
                                     break;
                                 case "contains":
                                 case "has":
-                                    if (reference.Contains(term) && !validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
+                                    if (reference.Contains(term).Equals(boolean) && !validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
                                     break;
                                 case "begins":
                                 case "starts":
-                                    if (reference.StartsWith(term) && !validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
+                                    if (reference.StartsWith(term).Equals(boolean) && !validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
                                     break;
                                 case "ends":
-                                    if (reference.EndsWith(term) && !validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
+                                    if (reference.EndsWith(term).Equals(boolean) && !validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
                                     break;
 
                             }
