@@ -10,7 +10,7 @@ using System.Xml;
 
 namespace baser
 {
-    internal class databaseManager
+    public class databaseManager
     {
         string dbPath = "";
         ushort colCount;
@@ -259,8 +259,10 @@ namespace baser
                                     if (reference == term && !validRows.Contains(i)) validRows.Add(i);
                                     break;
                                 case "contains":
+                                case "has":
                                     if (reference.Contains(term) && !validRows.Contains(i)) validRows.Add(i);
                                     break;
+                                case "begins":
                                 case "starts":
                                     if (reference.StartsWith(term) && !validRows.Contains(i)) validRows.Add(i);
                                     break;
