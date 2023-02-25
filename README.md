@@ -3,6 +3,7 @@ Database Tool
 
 
 # Instructions
+Instructions last updated for v1.5.5
 ## Creating a Database
 Open baser, and use the `New {colSize} {colCount} {path}` command to create a new Database. DB is created in a .dbr file at `path`. `colSize` indicates the number of bytes allocated to each column, and the `colCount` indicates number of columns per row. The maximum value for each `colSize` and `colCount` is `2^16`
 
