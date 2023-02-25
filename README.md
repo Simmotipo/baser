@@ -20,3 +20,8 @@ Query options include
 - You can perform not equal searches with ~ (i.e. `columnName.is~`)
 - You can perform AND and OR operations, e.g. `query1&query2`, `query1%query2`, `query1&query2%query3`.
 - Note that OR (`%`) operations are the primary split points. As in, `A&B%C`, the request will be split first at %, hence a search of `(A and B) or C` will be returned. For `(A and B) or (A and C)` a search of `A&B%A&C` is required.
+
+## Using the API
+The Console Clients utilise APIv1, which is accessible via `http://{url}:{port}/{command}`, where `command` is the command as you would use it in the CLI.
+
+APIv2 is accessible at `http://{url}:{port}/api2/{command}`, where `command` is the command as you would use it in the CLI. APIv2 requests return the JSON-formatted equivalent of the plaintext response provided by APIv1
