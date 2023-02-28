@@ -121,6 +121,14 @@ namespace baser
                     else return "Invalid";
                 case "query":
                     return query(cmd.Substring(6));
+                case "sum":
+                    cmd = cmd.Substring(4);
+                    ushort c = Convert.ToUInt16(cmd.Split(' ')[0]);
+                    string rows = query(cmd.Substring(cmd.Split(' ')[0].Length));
+                    decimal t = 0;
+                    Console.WriteLine(rows.Split('\n').Length);
+                    foreach (string row in rows.Split('\n')) try { t += Convert.ToDecimal(row.Split('|')[c + 1]); } catch (Exception e) { }
+                    return Convert.ToString(t);
                 case "save":
                     if (save()) return "Success";
                     else return "Failed";
