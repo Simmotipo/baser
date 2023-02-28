@@ -126,7 +126,6 @@ namespace baser
                     ushort c = Convert.ToUInt16(cmd.Split(' ')[0]);
                     string rows = query(cmd.Substring(cmd.Split(' ')[0].Length));
                     decimal t = 0;
-                    Console.WriteLine(rows.Split('\n').Length);
                     foreach (string row in rows.Split('\n')) try { t += Convert.ToDecimal(row.Split('|')[c + 1]); } catch (Exception e) { }
                     return Convert.ToString(t);
                 case "save":
