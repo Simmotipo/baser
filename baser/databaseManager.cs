@@ -90,7 +90,7 @@ namespace baser
             switch (cmd.Split(' ')[0].ToLower())
             {
                 case "help":
-                    return "addrow {cols}\nclear\nclose\ndelrow {n}\ndisableapi\ndump\neditrow {n} {cols}\nenableapi {port} (requires Admin/Sudo)\ngetrow {n}\nquery {query}\nsave\nversion";
+                    return "addrow {cols}\nclear\nclose\ndelrow {n}\ndisableapi\ndump\neditrow {n} {cols}\nenableapi {port} (requires Admin/Sudo)\ngetrow {n}\nquery {query}\nsave\nsum {columnNo} {query}\nversion";
                 case "enableapi":
                 case "openapi":
                     if (api != null) return "The API is already started";
