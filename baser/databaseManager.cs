@@ -10,7 +10,7 @@ using System.Xml;
 
 namespace baser
 {
-    internal class databaseManager
+    public class databaseManager
     {
         string dbPath = "";
         ushort colCount;
@@ -81,6 +81,7 @@ namespace baser
 
         public string Do(string cmd, string mode, string source = "localFile")
         {
+            if (cmd.Replace(" ", "") == "") return "";
             switch (cmd.Split(' ')[0].ToLower())
             {
                 case "help":
@@ -229,8 +230,10 @@ namespace baser
                                 if (reference == term) validRows.Add(i);
                                 break;
                             case "contains":
+                            case "has":
                                 if (reference.Contains(term)) validRows.Add(i);
                                 break;
+                            case "begins":
                             case "starts":
                                 if (reference.StartsWith(term)) validRows.Add(i);
                                 break;
@@ -256,8 +259,10 @@ namespace baser
                                     if (reference == term && !validRows.Contains(i)) validRows.Add(i);
                                     break;
                                 case "contains":
+                                case "has":
                                     if (reference.Contains(term) && !validRows.Contains(i)) validRows.Add(i);
                                     break;
+                                case "begins":
                                 case "starts":
                                     if (reference.StartsWith(term) && !validRows.Contains(i)) validRows.Add(i);
                                     break;
