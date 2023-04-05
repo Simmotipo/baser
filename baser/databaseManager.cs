@@ -110,6 +110,8 @@ namespace baser
                         api = null;
                         return "API Stopped";
                     }
+                case "getFileBytes":
+                    return ASCIIEncoding.ASCII.GetString(db); //This should just return the ASCII equivalent of the DB. Receiver can then decode
                 case "close":
                 case "exit":
                     if (!changed || cmd.Split(' ').Length > 1 && cmd.Split(' ')[1].ToLower() == "--nosave" && source == "local") localRunning = false;
@@ -122,12 +124,21 @@ namespace baser
                 case "query":
                     return query(cmd.Substring(6));
                 case "sum":
-                    cmd = cmd.Substring(4);
-                    ushort c = Convert.ToUInt16(cmd.Split(' ')[0]);
-                    string rows = query(cmd.Substring(cmd.Split(' ')[0].Length));
-                    decimal t = 0;
-                    foreach (string row in rows.Split('\n')) try { t += Convert.ToDecimal(row.Split('|')[c + 1]); } catch (Exception e) { }
-                    return Convert.ToString(t);
+                    try
+                    {
+                        cmd = cmd.Substring(4);
+                        ushort c = Convert.ToUInt16(cmd.Split(' ')[0]);
+                        if (cmd.Substring(cmd.Split(' ')[0].Length).Length < 2) return "Invalid SUM syntax";
+                        string rows = query(cmd.Substring(cmd.Split(' ')[0].Length));
+                        decimal t = 0;
+                        if (c > rows.Split('\n')[0].Split('|').Length || Convert.ToString(c) != cmd.Split(' ')[0]) return "Invalid SUM syntax.";
+                        foreach (string row in rows.Split('\n')) try { t += Convert.ToDecimal(row.Split('|')[c + 1]); } catch (Exception e) { }
+                        return Convert.ToString(t); 
+                    }
+                    catch (Exception e)
+                    {
+                        return "Invalid SUM syntax.";
+                    }
                 case "save":
                     if (save()) return "Success";
                     else return "Failed";

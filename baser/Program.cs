@@ -5,7 +5,7 @@ namespace baser
     class Controller
     {
         public static databaseManager dbMgr;
-        public static string version = "1.6.1";
+        public static string version = "1.6.3";
         public static void Main(string[] args)
         {
             string resp = "";
@@ -18,7 +18,7 @@ namespace baser
             {
                 try
                 {
-                    Console.Write("New {colSize} {colCount} {path}, Open {path}, Remote {http://URL:PORT}, or exit? ");
+                    Console.Write("New {colSize} {colCount} {path}, Open {path}, Version, Remote {http://URL:PORT}, or exit? ");
                     resp = Console.ReadLine();
                     switch (resp.ToUpper()[0])
                     {

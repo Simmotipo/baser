@@ -96,7 +96,7 @@ namespace baser
                     break;
                 default:
                     if (noServCmds.Contains(cmd.Split(' ')[0].ToLower())) return new string[]{ "ERR: You have requested over API a command that can only be run locally (or on a local database).\nWhile you are here, we recommend ensuring you are running at least version 1.3.4, as this resolves some of these issues.", "text/html" };
-                    else return new string[]{ dbMgr.Do(cmd, "localFile"), "text/html" };
+                    else return new string[]{ dbMgr.Do(cmd, "localFile"), "text/plain" };
 
             }
 
