@@ -5,14 +5,15 @@ namespace baser
     class Controller
     {
         public static databaseManager dbMgr;
-        public static string version = "1.6.3";
+        public static string version = "1.6.4";
         public static void Main(string[] args)
         {
             string resp = "";
             if (args.Length > 0 && File.Exists(args[0]))
             {
                 if (args.Length == 1) dbMgr = new databaseManager(args[0]);
-                else dbMgr = new databaseManager(args[0], apiPort:Convert.ToUInt16(args[1]));
+                else if (args.Length == 2) dbMgr = new databaseManager(args[0], apiPort: Convert.ToUInt16(args[1]));
+                else if (args.Length == 3) dbMgr = new databaseManager(args[0], apiPort: Convert.ToUInt16(args[1]), haveLocalRunning: Convert.ToBoolean(args[2]));
             }
             while (true)
             {

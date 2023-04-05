@@ -21,11 +21,13 @@ namespace baser
         int bytesPerRow;
         bool changed = false;
         bool localRunning = true;
+        bool holdMainThread = true;
         bool apiRunning = false;
         apiManager api = null;
 
-        public databaseManager(string path, string mode = "localFile", ushort apiPort = 0)
+        public databaseManager(string path, string mode = "localFile", ushort apiPort = 0, bool haveLocalRunning = true)
         {
+            localRunning = haveLocalRunning;
             dbPath = path;
             byte[] dataIngress = null;
             if (mode == "localFile") 
@@ -76,7 +78,7 @@ namespace baser
                 }
                 catch (Exception e) { }
             }
-
+            while (holdMainThread) { System.Threading.Thread.Sleep(60000); }
         }
 
         public string Do(string cmd, string mode, string source = "localFile")
@@ -114,7 +116,7 @@ namespace baser
                     return ASCIIEncoding.ASCII.GetString(db); //This should just return the ASCII equivalent of the DB. Receiver can then decode
                 case "close":
                 case "exit":
-                    if (!changed || cmd.Split(' ').Length > 1 && cmd.Split(' ')[1].ToLower() == "--nosave" && source == "local") localRunning = false;
+                    if (!changed || cmd.Split(' ').Length > 1 && cmd.Split(' ')[1].ToLower() == "--nosave" && source == "local") { localRunning = false; holdMainThread = false; }
                     else return "There are unsaved changes! Use exit --nosave to close without saving!";
                     return "";
                 case "addrow":
