@@ -59,18 +59,21 @@ namespace baser
                 {
                     Console.Write("> ");
                     string cmd = Console.ReadLine();
-                    if (mode == "localFile" || localCmds.Contains(cmd.Split(' ')[0])) Console.WriteLine(Do(cmd, mode));
-                    else
+                    if (cmd.Replace(" ", "") != "")
                     {
-                        if (cmd.Split(' ')[0].ToLower() == "disableapi") Console.WriteLine("ERR: You cannot run disableapi from remote client!");
+                        if (mode == "localFile" || localCmds.Contains(cmd.Split(' ')[0])) Console.WriteLine(Do(cmd, mode));
                         else
                         {
-                            using (var httpClient = new HttpClient())
+                            if (cmd.Split(' ')[0].ToLower() == "disableapi") Console.WriteLine("ERR: You cannot run disableapi from remote client!");
+                            else
                             {
-                                using (var request = new HttpRequestMessage(new HttpMethod("GET"), $"{dbPath}/{cmd}"))
+                                using (var httpClient = new HttpClient())
                                 {
-                                    var response = httpClient.SendAsync(request);
-                                    Console.WriteLine(response.Result.Content.ReadAsStringAsync().Result);
+                                    using (var request = new HttpRequestMessage(new HttpMethod("GET"), $"{dbPath}/{cmd}"))
+                                    {
+                                        var response = httpClient.SendAsync(request);
+                                        Console.WriteLine(response.Result.Content.ReadAsStringAsync().Result);
+                                    }
                                 }
                             }
                         }
