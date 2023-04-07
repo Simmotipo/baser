@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using static System.Net.WebRequestMethods;
 
 namespace baser
 {
@@ -115,8 +117,9 @@ namespace baser
                         api = null;
                         return "API Stopped";
                     }
-                case "getfilybytes":
-                    return ASCIIEncoding.ASCII.GetString(db); //This should just return the ASCII equivalent of the DB. Receiver can then decode
+                case "getfilebytes":
+                    if (!dbPath.EndsWith(".dbr")) return ASCIIEncoding.ASCII.GetString(System.IO.File.ReadAllBytes(dbPath += ".dbr"));
+                    else return ASCIIEncoding.ASCII.GetString(System.IO.File.ReadAllBytes(dbPath)); //This should just return the ASCII equivalent of the DB. Receiver can then decode
                 case "close":
                 case "exit":
                     if (!changed || cmd.Split(' ').Length > 1 && cmd.Split(' ')[1].ToLower() == "--nosave" && source == "local") { localRunning = false; holdMainThread = false; }
