@@ -115,7 +115,7 @@ namespace baser
                         api = null;
                         return "API Stopped";
                     }
-                case "getFileBytes":
+                case "getfilybytes":
                     return ASCIIEncoding.ASCII.GetString(db); //This should just return the ASCII equivalent of the DB. Receiver can then decode
                 case "close":
                 case "exit":
