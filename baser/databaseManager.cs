@@ -36,7 +36,7 @@ namespace baser
             {
                 if (!path.EndsWith(".dbr")) path += ".dbr";
 
-                dataIngress = File.ReadAllBytes(path);
+                dataIngress = System.IO.File.ReadAllBytes(path);
                 db = new byte[dataIngress.Length - 4];
                 for (int i = 0; i < db.Length; i++) db[i] = dataIngress[i + 4];
                 byte[] colBytes = { dataIngress[0], dataIngress[1] };
@@ -196,7 +196,7 @@ namespace baser
 
         public byte[] pullFileContents()
         {
-            return File.ReadAllBytes(dbPath);
+            return System.IO.File.ReadAllBytes(dbPath);
         }
 
         public string print(int row)
@@ -459,7 +459,7 @@ namespace baser
                 data[1] = d1[1];
                 data[2] = d2[0];
                 data[3] = d2[1];
-                File.WriteAllBytes(dbPath, data.Concat(db).ToArray());
+                System.IO.File.WriteAllBytes(dbPath, data.Concat(db).ToArray());
                 changed = false;
                 return true;
             }
