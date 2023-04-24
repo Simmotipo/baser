@@ -8,7 +8,7 @@ Instructions last updated for v1.5.5
 Open baser, and use the `New {colSize} {colCount} {path}` command to create a new Database. DB is created in a .dbr file at `path`. `colSize` indicates the number of bytes allocated to each column, and the `colCount` indicates number of columns per row. The maximum value for each `colSize` and `colCount` is `2^16`
 
 ## Hosting a remote database
-On the remote host, follow the instructions for creating a database. Then, either open this database, and use the `enableapi {port}` command, where port is the port on which API requests will be handled, or run `./baser.exe {path} {apiPort}` (as Administrator on Windows), or `sudo dotnet baser.dll {path} {apiPort}` (on Linux), where `path` is the location of the database, and `apiPort` is the port on which API requests will be handled.
+On the remote host, follow the instructions for creating a database. Then, either open this database, and use the `enableapi {port}` command, where port is the port on which API requests will be handled, or run `./baser.exe {path} {apiPort}` (as Administrator on Windows), or `sudo dotnet baser.dll {path} {apiPort}` (on Linux), where `path` is the location of the database, and `apiPort` is the port on which API requests will be handled. Use `./baser.exe {path} {apiPort} false` (Windows) or `sudo dotnet baser.dll {path} {apiPort} false` to disable local CLI operation on hosted databases (prevents excess logging bug).
 
 ## Using a database
 Refer to the `help` command available once a database is opened.
