@@ -283,9 +283,9 @@ namespace baser
                 }
                 else
                 {
-                    List<int> validRowsQueue = new List<int>();
                     for (int i = 0; i < rowIndex.Length; i++)
                     {
+                        List<int> validRowsQueue = new List<int>();
                         bool breakMe = false;
                         for (colNumber = 0; colNumber < colCount; colNumber++)
                         {
@@ -293,13 +293,17 @@ namespace baser
                             switch (colTerm)
                             {
                                 case "is":
-                                    if ((reference == term).Equals(boolean))
+                                    if (reference == term)
                                     {
                                         //This causes a Bug: If a subsequent columns results in breakMe, these cols have already been added.
                                         //Instead, add to a 'validRowsQueue', and at end if !breakMe, for each in validRowsQueue add to validRows
-                                        validRowsQueue.Add(rowIndex[i]); 
+                                        if (boolean) { if (!validRows.Contains(rowIndex[i])) { validRowsQueue.Add(rowIndex[i]); } breakMe = true; }
+                                        else breakMe = true;
                                     }
-                                    else if (!boolean) breakMe = true;
+                                    else
+                                    {
+                                        if (!boolean) { validRowsQueue.Add(rowIndex[i]);}
+                                    }
                                     break;
                                 case "contains":
                                 case "has":
@@ -327,8 +331,9 @@ namespace baser
 
                             }
                             if (breakMe) break;
-                            else foreach (int rowInt in validRowsQueue) if (!validRows.Contains(rowInt)) validRows.add(rowInt);
                         }
+                        if (!boolean && !breakMe) foreach (int rowInt in validRowsQueue) if (!validRows.Contains(rowInt)) validRows.Add(rowInt);
+                    }
                 }
 
                 return validRows.ToArray();
