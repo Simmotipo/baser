@@ -309,6 +309,7 @@ namespace baser
                 }
                 else
                 {
+                    List<int> validRowsQueue = new List<int>();
                     for (int i = 0; i < rowIndex.Length; i++)
                     {
                         bool breakMe = false;
@@ -320,7 +321,9 @@ namespace baser
                                 case "is":
                                     if ((reference == term).Equals(boolean))
                                     {
-                                        if (!validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
+                                        //This causes a Bug: If a subsequent columns results in breakMe, these cols have already been added.
+                                        //Instead, add to a 'validRowsQueue', and at end if !breakMe, for each in validRowsQueue add to validRows
+                                        validRowsQueue.Add(rowIndex[i]); 
                                     }
                                     else if (!boolean) breakMe = true;
                                     break;
@@ -328,7 +331,7 @@ namespace baser
                                 case "has":
                                     if (reference.Contains(term).Equals(boolean))
                                     {
-                                        if (!validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
+                                        validRowsQueue.Add(rowIndex[i]);
                                     }
                                     else if (!boolean) breakMe = true;
                                     break;
@@ -336,20 +339,21 @@ namespace baser
                                 case "starts":
                                     if (reference.StartsWith(term).Equals(boolean))
                                     {
-                                        if (!validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
+                                        validRowsQueue.Add(rowIndex[i]);
                                     }
                                     else if (!boolean) breakMe = true;
                                     break;
                                 case "ends":
                                     if (reference.EndsWith(term).Equals(boolean))
                                     {
-                                        if (!validRows.Contains(rowIndex[i])) validRows.Add(rowIndex[i]);
+                                         validRowsQueue.Add(rowIndex[i]);
                                     }
                                     else if (!boolean) breakMe = true;
                                     break;
 
                             }
                             if (breakMe) break;
+                            else foreach (int rowInt in validRowsQueue) if (!validRows.Contains(rowInt)) validRows.add(rowInt);
                         }
                     }
                 }
