@@ -89,8 +89,7 @@ namespace baser
                             result[0] = $"{{\"Server Version\":\"{Controller.version}\"}}";
                             break;
                         default:
-                            Console.WriteLine("Doing API2");
-                            result[0] = JsonUtils.ToJson(dbMgr.Do(cmd, "localFile"), dbMgr);
+                            result[0] = JsonUtils.ToJson(dbMgr.Do(cmd, "localFile"), dbMgr, includeRowNumber:true);
                             break;
                     }
                     break;

@@ -9,7 +9,7 @@ namespace baser
     
     public class JsonUtils
     {
-        public static string ToJson(string str, databaseManager db, char seperator = '|', char newline = '\n')
+        public static string ToJson(string str, databaseManager db, char seperator = '|', char newline = '\n', bool includeRowNumber = false)
         {
             if (str.Split(seperator).Length == 1) return $"{{\"value\":\"{str}\"}}";
             string[] keys = db.getRow(0);
@@ -20,6 +20,7 @@ namespace baser
                 if (line != "")
                 {
                     json += "{";
+                    if (includeRowNumber) json += $"\"row\":\"{line.Split(seperator)[0]}\",";
                     for (int i = 0; i < keys.Length; i++)
                     {
                         json += $"\"{keys[i]}\":\"{line.Split(seperator)[i + 1]}\",";

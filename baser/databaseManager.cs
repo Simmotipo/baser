@@ -224,6 +224,8 @@ namespace baser
 
                 List<int> validRows = new List<int>();
 
+                validRows.Add(0);
+
                 string[] queries = equation.Split('%'); //Note: this is currently all implementing OR only.
                 foreach (string query in queries)
                 {
