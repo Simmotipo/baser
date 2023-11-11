@@ -425,15 +425,22 @@ namespace baser
 
         public string[] getRow(int rowNum)
         {
-            int startNum = rowNum * (colSize * colCount);
-            string[] row = new string[colCount];
-            for (ushort i = 0; i < colCount; i++)
+            try
             {
-                byte[] bytes = new byte[colSize];
-                for (ushort x = 0; x < colSize; x++) bytes[x] = db[startNum + (i * colSize) + x];
-                row[i] = new ASCIIEncoding().GetString(bytes, 0, colSize);
+                int startNum = rowNum * (colSize * colCount);
+                string[] row = new string[colCount];
+                for (ushort i = 0; i < colCount; i++)
+                {
+                    byte[] bytes = new byte[colSize];
+                    for (ushort x = 0; x < colSize; x++) bytes[x] = db[startNum + (i * colSize) + x];
+                    row[i] = new ASCIIEncoding().GetString(bytes, 0, colSize);
+                }
+                return row;
             }
-            return row;
+            catch
+            {
+                return getRow(0);
+            }
         }
         public bool addRow(string[] cols)
         {
