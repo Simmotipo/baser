@@ -1,5 +1,5 @@
 # baser
-Database Tool
+Silly lil database tool. I got bored, what can I say?
 
 
 # Instructions
